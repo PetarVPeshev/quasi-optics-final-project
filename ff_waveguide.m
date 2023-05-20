@@ -116,7 +116,7 @@ for media_idx = 1 : 1 : length(lens.er)
         num2str(round(waveguide.b * 1e3, 2)) ' mm'], 'FontSize', ...
         17, 'FontWeight', 'bold');
     saveas(gcf, ['figures\waveguide_Meq_lens_er_' ...
-        num2str(lens.er) '.fig']);
+        num2str(lens.er(media_idx)) '.fig']);
 
     %% PLOT APERTURE ELECTRIC FAR-FIELD
     figure('Position', [250 250 1050 400]);
@@ -158,7 +158,7 @@ for media_idx = 1 : 1 : length(lens.er)
         num2str(round(waveguide.b * 1e3, 2)) ' mm'], 'FontSize', ...
         17, 'FontWeight', 'bold');
     saveas(gcf, ['figures\waveguide_pattern_lens_er_' ...
-        num2str(lens.er) '.fig']);
+        num2str(lens.er(media_idx)) '.fig']);
 end
 
 %% SAVE WORKSPACE
