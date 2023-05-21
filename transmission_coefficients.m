@@ -28,17 +28,17 @@ lens.crit_angle = asin(1 ./ lens.n);
 lens.theta_max = pi / 2 - lens.crit_angle;
 
 %% INCIDENT ANGLE @ ELIPSE
-elipse.theta_inc = acos( (1 - lens.eccin' * cos(theta_inc)) ...
+ellipse.theta_inc = acos( (1 - lens.eccin' * cos(theta_inc)) ...
     ./ sqrt(1 + lens.eccin' .^ 2 - 2 * lens.eccin' * cos(theta_inc)) );
-elipse.theta_inc(theta_inc > lens.theta_max') = NaN;
+ellipse.theta_inc(theta_inc > lens.theta_max') = NaN;
 
 %% TRANSMISSION ANGLE
 % @ Plane
 plane.theta_tr = asin(lens.n' .* sin(theta_inc));
 plane.theta_tr(imag(plane.theta_tr) ~= 0) = NaN;
 % @ Elipse
-elipse.theta_tr = asin(lens.n' .* sin(elipse.theta_inc));
-elipse.theta_tr(imag(elipse.theta_tr) ~= 0) = NaN;
+ellipse.theta_tr = asin(lens.n' .* sin(ellipse.theta_inc));
+ellipse.theta_tr(imag(ellipse.theta_tr) ~= 0) = NaN;
 
 % @ Plane
 plane.par_tr = NaN(length(lens.er), Ntheta);
@@ -46,10 +46,10 @@ plane.per_tr = NaN(length(lens.er), Ntheta);
 plane.per_power = NaN(length(lens.er), Ntheta);
 plane.par_power = NaN(length(lens.er), Ntheta);
 % @ Elipse
-elipse.par_tr = NaN(length(lens.er), Ntheta);
-elipse.per_tr = NaN(length(lens.er), Ntheta);
-elipse.per_power = NaN(length(lens.er), Ntheta);
-elipse.par_power = NaN(length(lens.er), Ntheta);
+ellipse.par_tr = NaN(length(lens.er), Ntheta);
+ellipse.per_tr = NaN(length(lens.er), Ntheta);
+ellipse.per_power = NaN(length(lens.er), Ntheta);
+ellipse.par_power = NaN(length(lens.er), Ntheta);
 for medium_idx = 1 : 1 : length(lens.er)
     %% TRANSMISSION COEFFICIENTS
     % @ Plane
@@ -57,9 +57,9 @@ for medium_idx = 1 : 1 : length(lens.er)
         transm_coeff(theta_inc, plane.theta_tr(medium_idx, :), ...
         lens.er(medium_idx), 1);
     % @ Elipse
-    [elipse.par_tr(medium_idx, :), elipse.per_tr(medium_idx, :)] = ...
-        transm_coeff(elipse.theta_inc(medium_idx, :), ...
-        elipse.theta_tr(medium_idx, :), lens.er(medium_idx), 1);
+    [ellipse.par_tr(medium_idx, :), ellipse.per_tr(medium_idx, :)] = ...
+        transm_coeff(ellipse.theta_inc(medium_idx, :), ...
+        ellipse.theta_tr(medium_idx, :), lens.er(medium_idx), 1);
 
     %% TRANSMITTED POWER
     % @ Plane
@@ -72,14 +72,14 @@ for medium_idx = 1 : 1 : length(lens.er)
     plane.per_power(medium_idx, ...
         find(isnan(plane.per_power(medium_idx, :)), 1)) = 0;
     % @ Elipse
-    [elipse.per_power(medium_idx, :), elipse.par_power(medium_idx, :)] = ...
-        surf_transm_power(elipse.par_tr(medium_idx, :), ...
-        elipse.per_tr(medium_idx, :), elipse.theta_inc(medium_idx, :), ...
-        elipse.theta_tr(medium_idx, :), lens.er(medium_idx), 1);
-    elipse.par_power(medium_idx, ...
-        find(isnan(elipse.par_power(medium_idx, :)), 1)) = 0;
-    elipse.per_power(medium_idx, ...
-        find(isnan(elipse.per_power(medium_idx, :)), 1)) = 0;
+    [ellipse.per_power(medium_idx, :), ellipse.par_power(medium_idx, :)] = ...
+        surf_transm_power(ellipse.par_tr(medium_idx, :), ...
+        ellipse.per_tr(medium_idx, :), ellipse.theta_inc(medium_idx, :), ...
+        ellipse.theta_tr(medium_idx, :), lens.er(medium_idx), 1);
+    ellipse.par_power(medium_idx, ...
+        find(isnan(ellipse.par_power(medium_idx, :)), 1)) = 0;
+    ellipse.per_power(medium_idx, ...
+        find(isnan(ellipse.per_power(medium_idx, :)), 1)) = 0;
 end
 
 %% PLOT TRANSMISSION POWER
@@ -113,11 +113,11 @@ saveas(gcf, 'figures\tx_power_ratio_plane.fig');
 % @ Elipse
 figure('Position', [250 250 1050 400]);
 for medium_idx = 1 : 1 : length(lens.er)
-    plot(theta_inc * 180 / pi, elipse.per_power(medium_idx, :), ...
+    plot(theta_inc * 180 / pi, ellipse.per_power(medium_idx, :), ...
         'Color', colors(medium_idx, :), 'LineWidth', 2.0, 'DisplayName', ...
         ['TE, \epsilon_{r} = ' num2str(lens.er(medium_idx))]);
     hold on;
-    plot(theta_inc * 180 / pi, elipse.par_power(medium_idx, :), '--', ...
+    plot(theta_inc * 180 / pi, ellipse.par_power(medium_idx, :), '--', ...
         'Color', colors(medium_idx, :), 'LineWidth', 2.0, 'DisplayName', ...
         ['TM, \epsilon_{r} = ' num2str(lens.er(medium_idx))]);
     hold on;
@@ -132,9 +132,9 @@ legend show;
 legend('location', 'bestoutside');
 xlabel('\theta / deg');
 ylabel('P_{t} / P_{i}');
-title('TE & TM Transmitted Power Ratio @ Elipse Interface');
-saveas(gcf, 'figures\tx_power_ratio_elipse.fig');
+title('TE & TM Transmitted Power Ratio @ Ellipse Interface');
+saveas(gcf, 'figures\tx_power_ratio_ellipse.fig');
 
 %% SAVE WORKSPACE
 plane.theta_inc = theta_inc;
-save('results\transmission_coeffs.mat', 'lens', 'plane', 'elipse');
+save('results\transmission_coeffs.mat', 'lens', 'plane', 'ellipse');
