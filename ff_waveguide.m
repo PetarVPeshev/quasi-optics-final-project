@@ -12,6 +12,7 @@ end
 
 addpath('../quasi-optics-library');
 c = physconst('LightSpeed');
+zeta = 376.730313668;
 
 %% PARAMETERS
 wave.f = 70e9;
@@ -27,6 +28,8 @@ R = 1;
 %% DEPENDENT PARAMETERS
 wave.wavelength = c / wave.f;
 wave.k0 = 2 * pi / wave.wavelength;
+waveguide.kx1 = pi / waveguide.a;
+waveguide.kz = sqrt(wave.k0 ^ 2 - waveguide.kx1 .^ 2);
 
 %% COORDINATE GRID
 theta = linspace(eps, pi / 2, Ntheta);
@@ -36,9 +39,14 @@ sph_grid = meshgrid_comb(theta, phi);
 %% REFRACTIVE INDECIES
 waveguide.n = sqrt(waveguide.er);
 lens.n = sqrt(lens.er);
+lens.Z = zeta ./ lens.n;
 
-% %% TRANSMISSION COEFFICIENT @ WAVEGUIDE-LENS INTERFACE
-% T = 2 * waveguide.n ./ (waveguide.n + lens.n);
+%% WAVEGUIDE TE IMPEDANCE
+waveguide.ZTE = zeta * wave.k0 ./ waveguide.kz;
+
+%% TRANSMISSION COEFFICIENT @ WAVEGUIDE-LENS INTERFACE
+TE_coef = 2 * lens.Z ./ (lens.Z + waveguide.ZTE);
+TE_T = (TE_coef .^ 2) .* (waveguide.ZTE ./ lens.Z);
 
 k = NaN(1, length(lens.er));
 k_comp = NaN( [size(sph_grid, 1, 2), 3, length(lens.er)] );
@@ -46,18 +54,15 @@ M = zeros( [size(sph_grid, 1, 2), 3, length(lens.er)] );
 SGFem = NaN( [size(sph_grid, 1, 2), 3, 3, length(lens.er)] );
 Eff = NaN( [size(sph_grid, 1, 2), 3, length(lens.er)] );
 Eff_total = NaN( [size(sph_grid, 1, 2), length(lens.er)] );
+dir = NaN( [size(sph_grid, 1, 2), length(lens.er)] );
+dir_broadside = NaN(1, length(lens.er));
 for media_idx = 1 : 1 : length(lens.er)
     %% WAVE VECTOR COMPONENTS
     [k_comp(:, :, :, media_idx), k(media_idx)] ...
         = wave_vector(lens.er(media_idx), wave.k0, sph_grid);
 
     %% FOURIER TRANSFORM OF EQUIVALENT MAGNETIC CURRENT
-%     M(:, :, 1, media_idx) = 4 * pi * T(media_idx) * waveguide.E10 ...
-%         * waveguide.b * cos(waveguide.a * k_comp(:, :, 1, media_idx) / 2) ...
-%         .* sinc(waveguide.b * k_comp(:, :, 2, media_idx) / 2) ...
-%         ./ (waveguide.a * (k_comp(:, :, 1, media_idx) .^ 2 ...
-%         - (pi / waveguide.a) ^ 2));
-    M(:, :, 1, media_idx) = 4 * pi * waveguide.E10 ...
+    M(:, :, 1, media_idx) = 4 * pi * TE_T(media_idx) * waveguide.E10 ...
         * waveguide.b * cos(waveguide.a * k_comp(:, :, 1, media_idx) / 2) ...
         .* sinc(waveguide.b * k_comp(:, :, 2, media_idx) / 2) ...
         ./ (waveguide.a * (k_comp(:, :, 1, media_idx) .^ 2 ...
@@ -72,6 +77,11 @@ for media_idx = 1 : 1 : length(lens.er)
         k_comp(:, :, 3, media_idx), SGFem(:, :, :, :, media_idx), ...
         M(:, :, :, media_idx));
     Eff_total(:, :, media_idx) = total_field(Eff(:, :, :, media_idx));
+
+    %% DIRECTIVITY
+    dir(:, :, media_idx) = directivity(lens.er(media_idx), ...
+        Eff(:, :, :, media_idx), sph_grid, R);
+    dir_broadside(media_idx) = dir(1, 1, media_idx);
 end
 
 %% UV COORDINATES
@@ -162,23 +172,35 @@ for media_idx = 1 : 1 : length(lens.er)
 end
 
 %% SAVE WORKSPACE
+lens_silicon.TE_coef = TE_coef(1);
+lens_silicon.TE_T = TE_T(1);
 lens_silicon.k = k(1);
 lens_silicon.k_comp = k_comp(:, :, :, 1);
 lens_silicon.M = M(:, :, 1, 1);
 lens_silicon.SGFem = SGFem(:, :, :, :, 1);
 lens_silicon.Eff = Eff(:, :, :, 1);
 lens_silicon.Eff_total = Eff_total(:, :, 1);
+lens_silicon.dir = dir(:, :, 1);
+lens_silicon.dir_broadside = dir_broadside(1);
+lens_quartz.TE_coef = TE_coef(2);
+lens_quartz.TE_T = TE_T(2);
 lens_quartz.k = k(2);
 lens_quartz.k_comp = k_comp(:, :, :, 2);
 lens_quartz.M = M(:, :, 1, 2);
 lens_quartz.SGFem = SGFem(:, :, :, :, 2);
 lens_quartz.Eff = Eff(:, :, :, 2);
 lens_quartz.Eff_total = Eff_total(:, :, 2);
+lens_quartz.dir = dir(:, :, 2);
+lens_quartz.dir_broadside = dir_broadside(2);
+lens_plastic.TE_coef = TE_coef(3);
+lens_plastic.TE_T = TE_T(3);
 lens_plastic.k = k(3);
 lens_plastic.k_comp = k_comp(:, :, :, 3);
 lens_plastic.M = M(:, :, 1, 3);
 lens_plastic.SGFem = SGFem(:, :, :, :, 3);
 lens_plastic.Eff = Eff(:, :, :, 3);
 lens_plastic.Eff_total = Eff_total(:, :, 3);
+lens_plastic.dir = dir(:, :, 3);
+lens_plastic.dir_broadside = dir_broadside(3);
 save('results\ff_waveguide.mat', 'wave', 'R', 'waveguide', 'lens', ...
     'sph_grid', 'lens_silicon', 'lens_quartz', 'lens_plastic');
