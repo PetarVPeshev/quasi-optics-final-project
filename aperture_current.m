@@ -21,10 +21,8 @@ waveguide.er = 1;
 waveguide.a = 3.212e-3;
 waveguide.b = 1.6e-3;
 lens.er = [11.9 4 2];
-% lens.max_angle = [40 40 40] * pi / 180;
 lens_grid.Nrho = 200;
 lens_grid.Nphi = 200;
-% n = 4;
 
 %% DEPENDENT PARAMETERS
 wave.wavelength = c / wave.f;
@@ -56,7 +54,7 @@ J = zeros( [size(lens_grid.cyl_grid, 1, 2), 3, length(lens.er)] );
 J_norm = NaN( [size(J, 1, 2, 3), length(lens.er)] );
 for media_idx = 1 : 1 : length(lens.er)
     lens.param(media_idx) = lens_parameters(lens.D, lens.er(media_idx), ...
-        lens_grid.cyl_grid);  % , lens.max_angle(media_idx)
+        lens_grid.cyl_grid);
 
     S = sqrt(cos(lens.param(media_idx).theta_t) .* (lens.param(media_idx).eccint ...
         * cos(lens.param(media_idx).sph_grid(:, :, 2)) - 1) ./ ( cos(lens.param(media_idx).theta_i) ...
@@ -74,15 +72,10 @@ for media_idx = 1 : 1 : length(lens.er)
 
     SGFem = dyadic_sgf(lens.er(media_idx), k, k_comp, 'E', 'M');
 
-%     const = ( cos(lens.param(media_idx).sph_grid(:, :, 2)) .^ n ) ./ lens.param(media_idx).sph_grid(:, :, 1);
-%     Efeed = zeros( [size(lens.param(media_idx).sph_grid, 1, 2), 3] );
-%     Efeed(:, :, 2) = const .* cos(lens.param(media_idx).sph_grid(:, :, 3));
-%     Efeed(:, :, 3) = - const .* sin(lens.param(media_idx).sph_grid(:, :, 3));
-
     Efeed = farfield(k, lens.param(media_idx).sph_grid(:, :, 1), ...
         lens.param(media_idx).sph_grid(:, :, 2 : 3), k_comp, SGFem, M);
     Efeed_total = total_field(Efeed);
-%     Efeed = Efeed .* exp(1j * k * lens.param(media_idx).sph_grid(:, :, 1));
+    Efeed = Efeed .* exp(1j * k * lens.param(media_idx).sph_grid(:, :, 1));
 
     [par_coeff, per_coeff] = transm_coeff(lens.param(media_idx).theta_i, ...
         lens.param(media_idx).theta_t, 1, lens.er(media_idx));
@@ -153,10 +146,6 @@ for media_idx = 1 : 1 : length(lens.er)
     grid on;
     colormap('jet');
     colorbar;
-%     xticks(-5 : 2.5 : 5);
-%     yticks(-5 : 2.5 : 5);
-%     caxis([-10 0]);
-%     caxis([-80 -60]);
     caxis([-80 0]);
     view(0, 90);
     xlabel('x / mm');
@@ -169,10 +158,6 @@ for media_idx = 1 : 1 : length(lens.er)
     grid on;
     colormap('jet');
     colorbar;
-%     xticks(-5 : 2.5 : 5);
-%     yticks(-5 : 2.5 : 5);
-%     caxis([-45 -25]);
-%     caxis([-120 -80]);
     caxis([-50 0]);
     view(0, 90);
     xlabel('x / mm');
@@ -180,7 +165,7 @@ for media_idx = 1 : 1 : length(lens.er)
     zlabel('|J_{y}| / dB');
     title('|J_{y}| / dB');
     sgtitle(['Untruncated Aperture J_{eq} @ f = ' num2str(wave.f * 1e-9) ...
-        ' GHz, D = ' num2str(round(lens.D * 1e2, 2)) ' cm, ' ...
+        ' GHz, D = ' num2str(round(lens.D * 1e3, 2)) ' mm, ' ...
         '\epsilon_{r} = ' num2str(lens.er(media_idx)) ', a = ' ...
         num2str(round(waveguide.a * 1e3, 2)) ' mm, and b = ' ...
         num2str(round(waveguide.b * 1e3, 2)) ' mm'], 'FontSize', 17, ...
