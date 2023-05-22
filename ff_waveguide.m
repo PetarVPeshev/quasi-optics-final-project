@@ -88,7 +88,7 @@ end
 uv_grid = uv_repr(sph_grid);
 
 for media_idx = 1 : 1 : length(lens.er)
-    %% PLOT ELECTRIC CURRENT DENSITY
+    %% PLOT MAGNETIC CURRENT DENSITY
     figure('Position', [250 250 1050 400]);
     subplot(1, 2, 1);
     surface(uv_grid(:, :, 1), uv_grid(:, :, 2), ...
