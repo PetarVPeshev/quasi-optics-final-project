@@ -7,11 +7,11 @@ function [lens, cyl_grid, sph_grid, theta_inc, theta_tr] = ...
 
     lens.R = lens.D / 2;                    % Radius
     lens.e = 1 / sqrt(lens.er);             % Eccintercity
-    lens.theta_crit = asin(lens.eccint);    % Reflection critical angle
+    lens.theta_crit = asin(lens.e);         % Reflection critical angle
     
     % Maximum angle, equals critical angle if not specified
     if isempty(varargin)
-        lens.theta_max = pi / 2 - crit_angle - 0.01 * pi / 180;
+        lens.theta_max = pi / 2 - lens.theta_crit - 0.01 * pi / 180;
     elseif length(varargin) == 1
         lens.theta_max = varargin{1};
     else

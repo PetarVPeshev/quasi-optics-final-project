@@ -11,8 +11,17 @@ if ~exist([pwd() '\results'], 'dir')
 end
 
 addpath('../quasi-optics-library');
+
 c = physconst('LightSpeed');
 zeta = 376.730313668;
+
+wave = struct('f', [], 'wavelength', [], 'k0', []);
+waveguide = struct('E10', [], 'er', [], 'a', [], 'b', [], 'kx1', [], ...
+    'kz', [], 'n', [], 'ZTE', []);
+lens(3) = struct('er', [], 'n', [], 'Z', []);
+waveguide_lens(3) = struct('TE_coef', []);
+waveguide_field(3) = struct('k', [], 'k_comp', [], 'M', [], 'E', [], ...
+    'E_total', [], 'dir', [], 'dir_broadside', []);
 
 %% PARAMETERS
 wave.f = 70e9;
@@ -20,7 +29,9 @@ waveguide.E10 = 1;
 waveguide.er = 1;
 waveguide.a = 3.212e-3;
 waveguide.b = 1.6e-3;
-lens.er = [11.9 4 2];
+lens(1).er = 11.9;
+lens(2).er = 4;
+lens(3).er = 2;
 Ntheta = 1200;
 Nphi = 4800;
 R = 1;
@@ -30,75 +41,62 @@ wave.wavelength = c / wave.f;
 wave.k0 = 2 * pi / wave.wavelength;
 waveguide.kx1 = pi / waveguide.a;
 waveguide.kz = sqrt(wave.k0 ^ 2 - waveguide.kx1 .^ 2);
+for lens_idx = 1 : 1 : length(lens)
+    lens(lens_idx).n = sqrt(lens(lens_idx).er);
+    lens(lens_idx).Z = zeta / lens(lens_idx).n;
+end
 
 %% COORDINATE GRID
-theta = linspace(eps, pi / 2, Ntheta);
+theta = linspace(eps, pi / 2 - 0.1 * pi / 180, Ntheta);
 phi = linspace(0, 2 * pi, Nphi);
 sph_grid = meshgrid_comb(theta, phi);
 
 %% REFRACTIVE INDECIES
 waveguide.n = sqrt(waveguide.er);
-lens.n = sqrt(lens.er);
-lens.Z = zeta ./ lens.n;
 
 %% WAVEGUIDE TE IMPEDANCE
 waveguide.ZTE = zeta * wave.k0 ./ waveguide.kz;
 
 %% TRANSMISSION COEFFICIENT @ WAVEGUIDE-LENS INTERFACE
-TE_coef = 2 * lens.Z ./ (lens.Z + waveguide.ZTE);
-TE_T = (TE_coef .^ 2) .* (waveguide.ZTE ./ lens.Z);
+for lens_idx = 1 : 1 : length(lens)
+    waveguide_lens(lens_idx).TE_coef = 2 * lens(lens_idx).Z ...
+        ./ (lens(lens_idx).Z + waveguide.ZTE);
+end
 
-k = NaN(1, length(lens.er));
-k_comp = NaN( [size(sph_grid, 1, 2), 3, length(lens.er)] );
-M = zeros( [size(sph_grid, 1, 2), 3, length(lens.er)] );
-SGFem = NaN( [size(sph_grid, 1, 2), 3, 3, length(lens.er)] );
-Eff = NaN( [size(sph_grid, 1, 2), 3, length(lens.er)] );
-Eff_total = NaN( [size(sph_grid, 1, 2), length(lens.er)] );
-dir = NaN( [size(sph_grid, 1, 2), length(lens.er)] );
-dir_broadside = NaN(1, length(lens.er));
-for media_idx = 1 : 1 : length(lens.er)
+for lens_idx = 1 : 1 : length(lens)
     %% WAVE VECTOR COMPONENTS
-    [k_comp(:, :, :, media_idx), k(media_idx)] ...
-        = wave_vector(lens.er(media_idx), wave.k0, sph_grid);
+    [waveguide_field(lens_idx).k_comp, waveguide_field(lens_idx).k] ...
+        = wave_vector(lens(lens_idx).er, wave.k0, sph_grid);
 
-    %% FOURIER TRANSFORM OF EQUIVALENT MAGNETIC CURRENT
-    M(:, :, 1, media_idx) = 4 * pi * TE_T(media_idx) * waveguide.E10 ...
-        * waveguide.b * cos(waveguide.a * k_comp(:, :, 1, media_idx) / 2) ...
-        .* sinc(waveguide.b * k_comp(:, :, 2, media_idx) / 2) ...
-        ./ (waveguide.a * (k_comp(:, :, 1, media_idx) .^ 2 ...
-        - (pi / waveguide.a) ^ 2));
-
-    %% SPECTRAL GREEN'S FUNCTIONS
-    SGFem(:, :, :, :, media_idx) = dyadic_sgf(lens.er(media_idx), ...
-        k(media_idx), k_comp(:, :, :, media_idx), 'E', 'M');
-
-    %% WAVEGUIDE RADIATED FAR-FIELD
-    Eff(:, :, :, media_idx) = farfield(k(media_idx), R, sph_grid, ...
-        k_comp(:, :, 3, media_idx), SGFem(:, :, :, :, media_idx), ...
-        M(:, :, :, media_idx));
-    Eff_total(:, :, media_idx) = total_field(Eff(:, :, :, media_idx));
+    %% EQUIVALENT MAGNETIC CURRENT AND RADIATED FAR-FIELD
+    % Waveguide radiated field and equivalent magnetic current
+    [waveguide_field(lens_idx).E, waveguide_field(lens_idx).M] ...
+        = waveguide_feed(waveguide, waveguide_lens(lens_idx).TE_coef, ...
+        waveguide_field(lens_idx).k, waveguide_field(lens_idx).k_comp, R, sph_grid);
+    % Waveguide total radiated magnetic field
+    waveguide_field(lens_idx).E_total = total_field(waveguide_field(lens_idx).E);
 
     %% DIRECTIVITY
-    dir(:, :, media_idx) = directivity(lens.er(media_idx), ...
-        Eff(:, :, :, media_idx), sph_grid, R);
-    dir_broadside(media_idx) = dir(1, 1, media_idx);
+    waveguide_field(lens_idx).dir = directivity(lens(lens_idx).er, ...
+        waveguide_field(lens_idx).E, sph_grid, R);
+    waveguide_field(lens_idx).dir_broadside = waveguide_field(lens_idx).dir(1, 1);
 end
 
 %% UV COORDINATES
 uv_grid = uv_repr(sph_grid);
 
-for media_idx = 1 : 1 : length(lens.er)
+for lens_idx = 1 : 1 : length(lens)
     %% PLOT MAGNETIC CURRENT DENSITY
     figure('Position', [250 250 1050 400]);
     subplot(1, 2, 1);
     surface(uv_grid(:, :, 1), uv_grid(:, :, 2), ...
-        norm_magnitude(M(:, :, 1, media_idx), 'dB'), 'LineStyle', 'none');
+        norm_magnitude(waveguide_field(lens_idx).M(:, :, 1), 'dB'), 'LineStyle', 'none');
     grid on;
     colormap('jet');
     colorbar;
     xlim([-1 1]);
     ylim([-1 1]);
-    caxis([-40 0]);
+    caxis([-10 0]);
     view(0, 90);
     xticks(-1 : 1 : 1);
     yticks(-1 : 0.5 : 1);
@@ -107,13 +105,13 @@ for media_idx = 1 : 1 : length(lens.er)
     zlabel('|M_{eq}| / dB');
     subplot(1, 2, 2);
     surface(uv_grid(:, :, 1), uv_grid(:, :, 2), ...
-        norm_magnitude(M(:, :, 1, media_idx), 'dB'), 'LineStyle', 'none');
+        norm_magnitude(waveguide_field(lens_idx).M(:, :, 1), 'dB'), 'LineStyle', 'none');
     grid on;
     colormap('jet');
     colorbar;
     xlim([-1 1]);
     ylim([-1 1]);
-    caxis([-40 0]);
+    caxis([-10 0]);
     view(-37.5, 30);
     xticks(-1 : 1 : 1);
     yticks(-1 : 0.5 : 1);
@@ -121,25 +119,24 @@ for media_idx = 1 : 1 : length(lens.er)
     ylabel('V');
     zlabel('|M_{eq}| / dB');
     sgtitle(['Waveguide M_{eq} @ f = ' num2str(wave.f * 1e-9) ' GHz, ' ...
-        '\epsilon_{r,lens} = ' num2str(lens.er(media_idx)) ', a = ' ...
+        '\epsilon_{r,lens} = ' num2str(lens(lens_idx).er) ', a = ' ...
         num2str(round(waveguide.a * 1e3, 2)) ' mm, and b = ' ...
         num2str(round(waveguide.b * 1e3, 2)) ' mm'], 'FontSize', ...
         17, 'FontWeight', 'bold');
     saveas(gcf, ['figures\waveguide_Meq_lens_er_' ...
-        num2str(lens.er(media_idx)) '.fig']);
+        num2str(lens(lens_idx).er) '.fig']);
 
     %% PLOT APERTURE ELECTRIC FAR-FIELD
     figure('Position', [250 250 1050 400]);
     subplot(1, 2, 1);
     surface(uv_grid(:, :, 1), uv_grid(:, :, 2), ...
-        norm_magnitude(Eff_total(:, :, media_idx), 'dB'), ...
-        'LineStyle', 'none');
+        norm_magnitude(waveguide_field(lens_idx).E_total, 'dB'), 'LineStyle', 'none');
     grid on;
     colormap('jet');
     colorbar;
     xlim([-1 1]);
     ylim([-1 1]);
-    caxis([-40 0]);
+    caxis([-20 0]);
     view(0, 90);
     xticks(-1 : 1 : 1);
     yticks(-1 : 0.5 : 1);
@@ -148,14 +145,13 @@ for media_idx = 1 : 1 : length(lens.er)
     zlabel('|E| / dB');
     subplot(1, 2, 2);
     surface(uv_grid(:, :, 1), uv_grid(:, :, 2), ...
-        norm_magnitude(Eff_total(:, :, media_idx), 'dB'), ...
-        'LineStyle', 'none');
+        norm_magnitude(waveguide_field(lens_idx).E_total, 'dB'), 'LineStyle', 'none');
     grid on;
     colormap('jet');
     colorbar;
     xlim([-1 1]);
     ylim([-1 1]);
-    caxis([-40 0]);
+    caxis([-20 0]);
     view(-37.5, 30);
     xticks(-1 : 1 : 1);
     yticks(-1 : 0.5 : 1);
@@ -163,44 +159,14 @@ for media_idx = 1 : 1 : length(lens.er)
     ylabel('V');
     zlabel('|E| / dB');
     sgtitle(['Waveguide E^{FF} @ f = ' num2str(wave.f * 1e-9) ' GHz, ' ...
-        '\epsilon_{r,lens} = ' num2str(lens.er(media_idx)) ', a = ' ...
+        '\epsilon_{r,lens} = ' num2str(lens(lens_idx).er) ', a = ' ...
         num2str(round(waveguide.a * 1e3, 2)) ' mm, and b = ' ...
         num2str(round(waveguide.b * 1e3, 2)) ' mm'], 'FontSize', ...
         17, 'FontWeight', 'bold');
     saveas(gcf, ['figures\waveguide_pattern_lens_er_' ...
-        num2str(lens.er(media_idx)) '.fig']);
+        num2str(lens(lens_idx).er) '.fig']);
 end
 
 %% SAVE WORKSPACE
-lens_silicon.TE_coef = TE_coef(1);
-lens_silicon.TE_T = TE_T(1);
-lens_silicon.k = k(1);
-lens_silicon.k_comp = k_comp(:, :, :, 1);
-lens_silicon.M = M(:, :, 1, 1);
-lens_silicon.SGFem = SGFem(:, :, :, :, 1);
-lens_silicon.Eff = Eff(:, :, :, 1);
-lens_silicon.Eff_total = Eff_total(:, :, 1);
-lens_silicon.dir = dir(:, :, 1);
-lens_silicon.dir_broadside = dir_broadside(1);
-lens_quartz.TE_coef = TE_coef(2);
-lens_quartz.TE_T = TE_T(2);
-lens_quartz.k = k(2);
-lens_quartz.k_comp = k_comp(:, :, :, 2);
-lens_quartz.M = M(:, :, 1, 2);
-lens_quartz.SGFem = SGFem(:, :, :, :, 2);
-lens_quartz.Eff = Eff(:, :, :, 2);
-lens_quartz.Eff_total = Eff_total(:, :, 2);
-lens_quartz.dir = dir(:, :, 2);
-lens_quartz.dir_broadside = dir_broadside(2);
-lens_plastic.TE_coef = TE_coef(3);
-lens_plastic.TE_T = TE_T(3);
-lens_plastic.k = k(3);
-lens_plastic.k_comp = k_comp(:, :, :, 3);
-lens_plastic.M = M(:, :, 1, 3);
-lens_plastic.SGFem = SGFem(:, :, :, :, 3);
-lens_plastic.Eff = Eff(:, :, :, 3);
-lens_plastic.Eff_total = Eff_total(:, :, 3);
-lens_plastic.dir = dir(:, :, 3);
-lens_plastic.dir_broadside = dir_broadside(3);
-save('results\ff_waveguide.mat', 'wave', 'R', 'waveguide', 'lens', ...
-    'sph_grid', 'lens_silicon', 'lens_quartz', 'lens_plastic');
+% save('results\ff_waveguide.mat', 'wave', 'R', 'waveguide', 'lens', ...
+%     'sph_grid', 'waveguide_lens', 'waveguide_field');
