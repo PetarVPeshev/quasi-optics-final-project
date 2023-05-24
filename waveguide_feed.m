@@ -32,7 +32,9 @@ function [E, M] = waveguide_feed(waveguide, te_coeff, k, k_comp, r, ...
     Ez = E_const .* Gzx .* Mx;
     
     E = zeros( [size(sph_grid, 1, 2), 3] );
+    % Theta component
     E(:, :, 2) = Ey .* cos(theta) .* sin(phi) - Ez .* sin(theta);
+    % Phi component
     E(:, :, 3) = Ey .* cos(phi);
     
     M = zeros( [size(sph_grid, 1, 2), 3] );

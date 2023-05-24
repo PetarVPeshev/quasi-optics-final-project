@@ -32,8 +32,8 @@ waveguide.b = 1.6e-3;
 lens(1).er = 11.9;
 lens(2).er = 4;
 lens(3).er = 2;
-Ntheta = 1200;
-Nphi = 4800;
+Ntheta = 800;
+Nphi = 3200;
 R = 1;
 
 %% DEPENDENT PARAMETERS
@@ -72,14 +72,17 @@ for lens_idx = 1 : 1 : length(lens)
     % Waveguide radiated field and equivalent magnetic current
     [waveguide_field(lens_idx).E, waveguide_field(lens_idx).M] ...
         = waveguide_feed(waveguide, waveguide_lens(lens_idx).TE_coef, ...
-        waveguide_field(lens_idx).k, waveguide_field(lens_idx).k_comp, R, sph_grid);
+        waveguide_field(lens_idx).k, waveguide_field(lens_idx).k_comp, ...
+        R, sph_grid);
     % Waveguide total radiated magnetic field
-    waveguide_field(lens_idx).E_total = total_field(waveguide_field(lens_idx).E);
+    waveguide_field(lens_idx).E_total ...
+        = total_field(waveguide_field(lens_idx).E);
 
     %% DIRECTIVITY
     waveguide_field(lens_idx).dir = directivity(lens(lens_idx).er, ...
         waveguide_field(lens_idx).E, sph_grid, R);
-    waveguide_field(lens_idx).dir_broadside = waveguide_field(lens_idx).dir(1, 1);
+    waveguide_field(lens_idx).dir_broadside ...
+        = waveguide_field(lens_idx).dir(1, 1);
 end
 
 %% UV COORDINATES
@@ -90,7 +93,8 @@ for lens_idx = 1 : 1 : length(lens)
     figure('Position', [250 250 1050 400]);
     subplot(1, 2, 1);
     surface(uv_grid(:, :, 1), uv_grid(:, :, 2), ...
-        norm_magnitude(waveguide_field(lens_idx).M(:, :, 1), 'dB'), 'LineStyle', 'none');
+        norm_magnitude(waveguide_field(lens_idx).M(:, :, 1), 'dB'), ...
+        'LineStyle', 'none');
     grid on;
     colormap('jet');
     colorbar;
@@ -105,7 +109,8 @@ for lens_idx = 1 : 1 : length(lens)
     zlabel('|M_{eq}| / dB');
     subplot(1, 2, 2);
     surface(uv_grid(:, :, 1), uv_grid(:, :, 2), ...
-        norm_magnitude(waveguide_field(lens_idx).M(:, :, 1), 'dB'), 'LineStyle', 'none');
+        norm_magnitude(waveguide_field(lens_idx).M(:, :, 1), 'dB'), ...
+        'LineStyle', 'none');
     grid on;
     colormap('jet');
     colorbar;
@@ -130,7 +135,8 @@ for lens_idx = 1 : 1 : length(lens)
     figure('Position', [250 250 1050 400]);
     subplot(1, 2, 1);
     surface(uv_grid(:, :, 1), uv_grid(:, :, 2), ...
-        norm_magnitude(waveguide_field(lens_idx).E_total, 'dB'), 'LineStyle', 'none');
+        norm_magnitude(waveguide_field(lens_idx).E_total, 'dB'), ...
+        'LineStyle', 'none');
     grid on;
     colormap('jet');
     colorbar;
@@ -145,7 +151,8 @@ for lens_idx = 1 : 1 : length(lens)
     zlabel('|E| / dB');
     subplot(1, 2, 2);
     surface(uv_grid(:, :, 1), uv_grid(:, :, 2), ...
-        norm_magnitude(waveguide_field(lens_idx).E_total, 'dB'), 'LineStyle', 'none');
+        norm_magnitude(waveguide_field(lens_idx).E_total, 'dB'), ...
+        'LineStyle', 'none');
     grid on;
     colormap('jet');
     colorbar;
@@ -168,5 +175,5 @@ for lens_idx = 1 : 1 : length(lens)
 end
 
 %% SAVE WORKSPACE
-% save('results\ff_waveguide.mat', 'wave', 'R', 'waveguide', 'lens', ...
-%     'sph_grid', 'waveguide_lens', 'waveguide_field');
+save('results\ff_waveguide.mat', 'wave', 'R', 'waveguide', 'lens', ...
+    'sph_grid', 'waveguide_lens', 'waveguide_field');

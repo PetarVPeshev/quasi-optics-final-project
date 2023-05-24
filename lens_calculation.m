@@ -45,7 +45,8 @@ function [lens, cyl_grid, sph_grid, theta_inc, theta_tr] = ...
     sph_grid(:, :, 3) = phi;
 
     % Incident & transmission angle @ lens dielectric-free space interface
-    theta_inc = acos( (1 - lens.e * cos(theta)) ./ (1 + lens.e ^ 2 - 2 * lens.e * cos(theta)) );
-    theta_tr = asin( sqrt(lens.er) * sin(theta_inc) );
+    theta_inc = acos( (1 - lens.e * cos(theta)) ./ sqrt(1 + lens.e ^ 2 - 2 * lens.e * cos(theta)) );
+    theta_tr = acos( (cos(theta) - lens.e) ./ sqrt(1 + lens.e ^ 2 - 2 * lens.e * cos(theta)) );
+%     theta_tr = asin( sqrt(lens.er) * sin(theta_inc) );
 end
 
