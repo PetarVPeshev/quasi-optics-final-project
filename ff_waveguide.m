@@ -24,44 +24,48 @@ waveguide_field(3) = struct('k', [], 'k_comp', [], 'M', [], 'E', [], ...
     'E_total', [], 'dir', [], 'dir_broadside', []);
 
 %% PARAMETERS
+% Wave parameters
 wave.f = 70e9;
+% Waveguide parameters
 waveguide.E10 = 1;
 waveguide.er = 1;
 waveguide.a = 3.212e-3;
 waveguide.b = 1.6e-3;
+% Lens parameters
 lens(1).er = 11.9;
 lens(2).er = 4;
 lens(3).er = 2;
+% Grid parameters
 Ntheta = 800;
 Nphi = 3200;
+% Far-field parameters
 R = 1;
 
 %% DEPENDENT PARAMETERS
+% Wave parameters
 wave.wavelength = c / wave.f;
 wave.k0 = 2 * pi / wave.wavelength;
+% Waveguide parameters
 waveguide.kx1 = pi / waveguide.a;
 waveguide.kz = sqrt(wave.k0 ^ 2 - waveguide.kx1 .^ 2);
+waveguide.n = sqrt(waveguide.er);
+waveguide.ZTE = zeta * wave.k0 ./ waveguide.kz;
+% Lens parameters
 for lens_idx = 1 : 1 : length(lens)
     lens(lens_idx).n = sqrt(lens(lens_idx).er);
     lens(lens_idx).Z = zeta / lens(lens_idx).n;
 end
-
-%% COORDINATE GRID
-theta = linspace(eps, pi / 2 - 0.1 * pi / 180, Ntheta);
-phi = linspace(0, 2 * pi, Nphi);
-sph_grid = meshgrid_comb(theta, phi);
-
-%% REFRACTIVE INDECIES
-waveguide.n = sqrt(waveguide.er);
-
-%% WAVEGUIDE TE IMPEDANCE
-waveguide.ZTE = zeta * wave.k0 ./ waveguide.kz;
 
 %% TRANSMISSION COEFFICIENT @ WAVEGUIDE-LENS INTERFACE
 for lens_idx = 1 : 1 : length(lens)
     waveguide_lens(lens_idx).TE_coef = 2 * lens(lens_idx).Z ...
         ./ (lens(lens_idx).Z + waveguide.ZTE);
 end
+
+%% COORDINATE GRID
+theta = linspace(eps, pi / 2 - 0.1 * pi / 180, Ntheta);
+phi = linspace(0, 2 * pi, Nphi);
+sph_grid = meshgrid_comb(theta, phi);
 
 for lens_idx = 1 : 1 : length(lens)
     %% WAVE VECTOR COMPONENTS
@@ -175,5 +179,5 @@ for lens_idx = 1 : 1 : length(lens)
 end
 
 %% SAVE WORKSPACE
-save('results\ff_waveguide.mat', 'wave', 'R', 'waveguide', 'lens', ...
-    'sph_grid', 'waveguide_lens', 'waveguide_field');
+save('results\ff_waveguide.mat', 'wave', 'waveguide', 'lens', ...
+    'waveguide_lens', 'waveguide_field', 'sph_grid', 'R');
