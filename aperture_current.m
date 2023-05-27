@@ -30,8 +30,8 @@ wave.f = 70e9;
 % Waveguide parameters
 waveguide.E10 = 1;
 waveguide.er = 1;
-waveguide.a = 3.212e-3;
-waveguide.b = 1.6e-3;
+waveguide.a = 2.50e-3;  % 3.212
+waveguide.b = 1.87e-3;  % 1.6
 % Lens parameters
 lens(1).er = 11.9;
 lens(2).er = 4;
