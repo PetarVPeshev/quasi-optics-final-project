@@ -96,7 +96,7 @@ plot(a * 1e3, 10 * log10(dir_broadside), 'LineWidth', 2.0, ...
     'DisplayName', 'D');
 hold on;
 xline(3.19, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
-    'DisplayName', 'min a');
+    'DisplayName', 'min\{a\}');
 grid on;
 xlim([min(a) max(a)] * 1e3);
 legend show;
@@ -114,7 +114,7 @@ figure('Position', [250 250 750 400]);
 plot(a * 1e3, ZTE * 1e-3, 'LineWidth', 2.0, 'DisplayName', 'Z_{TE}');
 hold on;
 xline(3.19, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
-    'DisplayName', 'min a');
+    'DisplayName', 'min\{a\}');
 grid on;
 xlim([min(a) max(a)] * 1e3);
 legend show;
@@ -132,7 +132,7 @@ plot(a * 1e3, P_ratio, 'LineWidth', 2.0, ...
     'DisplayName', 'transmitted ratio');
 hold on;
 xline(3.19, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
-    'DisplayName', 'min a');
+    'DisplayName', 'min\{a\}');
 grid on;
 xlim([min(a) max(a)] * 1e3);
 legend show;
@@ -142,7 +142,25 @@ ylabel('P_{t}/P_{i}');
 title(['TE Power Ratio Waveguide-Lens @ f = ' ...
     num2str(wave.f * 1e-9) ' GHz, and \epsilon_{r} = ' num2str(lens.er)]);
 
+kz = NaN(1, Na);
+for a_idx = 1 : 1 : Na
+    kz(a_idx) = waveguide(a_idx).kz;
+end
+figure('Position', [250 250 750 400]);
+plot(a * 1e3, kz, 'LineWidth', 2.0, 'DisplayName', 'k_{z}');
+hold on;
+xline(3.19, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
+    'DisplayName', 'min\{a\}');
+grid on;
+xlim([min(a) max(a)] * 1e3);
+legend show;
+legend('location', 'bestoutside');
+xlabel('a / mm');
+ylabel('k_{z} / rad/m');
+title(['Propagation Constant @ f = ' ...
+    num2str(wave.f * 1e-9) ' GHz, and \epsilon_{r} = ' num2str(lens.er)]);
+
 %% SAVE WORKSPACE
 wg_silicon = struct('a', a, 'D', dir_broadside, 'ZTE', ZTE, ...
-    'P_ratio', P_ratio);
+    'P_ratio', P_ratio, 'kz', kz);
 save('results\wg_silicon.mat', 'wg_silicon');
