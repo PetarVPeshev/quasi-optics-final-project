@@ -43,7 +43,7 @@ for a_idx = 1 : 1 : Na
     waveguide(a_idx).b = a(a_idx) / 2;
 end
 % Lens parameters
-lens.er = 11.9;
+lens.er = 2;
 % Grid parameters
 Ntheta = 800;
 Nphi = 3200;
@@ -143,6 +143,6 @@ title(['TE Power Ratio Waveguide-Lens @ f = ' ...
     num2str(wave.f * 1e-9) ' GHz, and \epsilon_{r} = ' num2str(lens.er)]);
 
 %% SAVE WORKSPACE
-wg_silicon = struct('a', a, 'D', dir_broadside, 'ZTE', ZTE, ...
+wg_plastic = struct('a', a, 'D', dir_broadside, 'ZTE', ZTE, ...
     'P_ratio', P_ratio);
-save('results\wg_silicon.mat', 'wg_silicon');
+save('results\wg_plastic.mat', 'wg_plastic');
