@@ -114,6 +114,7 @@ legend('location', 'bestoutside');
 xlabel('D / \lambda_{0}');
 ylabel('D(\theta=0^{\circ},\phi=0^{\circ}) / dB');
 title('Broadside Directivity @ plstic lens, f = 70 GHz');
+saveas(gcf, 'figures\dir_lens_plastic.fig');
 
 %% SAVE WORKSPACE
 lens_plastic.dir_broadside = dir_broadside;

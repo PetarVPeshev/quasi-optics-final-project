@@ -114,6 +114,7 @@ legend('location', 'bestoutside');
 xlabel('D / \lambda_{0}');
 ylabel('D(\theta=0^{\circ},\phi=0^{\circ}) / dB');
 title('Broadside Directivity @ silicon lens, f = 70 GHz');
+saveas(gcf, 'figures\dir_lens_silicon.fig');
 
 %% SAVE WORKSPACE
 lens_silicon.dir_broadside = dir_broadside;
