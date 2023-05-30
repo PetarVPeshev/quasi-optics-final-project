@@ -2,9 +2,11 @@ close all;
 clear;
 clc;
 
-ff_waveguide_plastic;
-ff_waveguide_quartz;
-ff_waveguide_silicon;
+% waveguide_plastic;
+% waveguide_quartz;
+% waveguide_silicon;
+
+close all;
 
 load('results\wg_silicon.mat');
 load('results\wg_quartz.mat');
@@ -61,4 +63,18 @@ legend show;
 legend('location', 'bestoutside');
 xlabel('a / mm');
 ylabel('P_{t}/P_{i}');
-title('TE Power Ratio Waveguide-Lens @ f = 70 GHz');
+title('TE Transmitted Power Ratio Waveguide-Lens @ f = 70 GHz');
+
+figure('Position', [250 250 750 400]);
+plot(wg_silicon.a * 1e3, wg_silicon.kz, 'LineWidth', 2.0, ...
+    'DisplayName', 'k_{z}');
+xline(3.19, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
+    'DisplayName', 'min\{a\}');
+grid on;
+xlim([min(wg_silicon.a) max(wg_silicon.a)] * 1e3);
+legend show;
+legend('location', 'bestoutside');
+xlabel('a / mm');
+ylabel('k_{z} / rad/m');
+title('Propagation Constant @ f = 70 GHz');
+
