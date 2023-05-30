@@ -24,8 +24,8 @@ waveguide.er = 1;
 waveguide.a = 2.80 * 1e-3;
 waveguide.b = 1.88 * 1e-3;
 % Lens parameters
-lens.er = 11.9;
-lens.theta_max = 5 * pi / 180;
+lens.er = 2;
+lens.theta_max = 2 * pi / 180;
 % Grids parameters
 Nrho = 100;
 Nphi = 100;
@@ -119,7 +119,7 @@ surface(cart_coord(:, :, 1) * 1e3, cart_coord(:, :, 2) * 1e3, ...
 grid on;
 colormap('jet');
 colorbar;
-caxis([-70 -50]);
+caxis([-90 -70]);
 view(0, 90);
 xlabel('x / mm');
 ylabel('y / mm');
@@ -137,12 +137,12 @@ xlabel('x / mm');
 ylabel('y / mm');
 zlabel('|J_{y}| / dB');
 title('|J_{y}| / dB');
-sgtitle(['Aperture J_{eq} @ silicon, f = ' num2str(wave.f * 1e-9) ...
-    ' GHz, D = 14\lambda, \theta_{max} = 5 deg, a = ' ...
+sgtitle(['Aperture J_{eq} @ plastic, f = ' num2str(wave.f * 1e-9) ...
+    ' GHz, D = 14\lambda, \theta_{max} = 2 deg, a = ' ...
     num2str(round(waveguide.a * 1e3, 2)) ' mm, and b = ' ...
     num2str(round(waveguide.b * 1e3, 2)) ' mm'], ...
     'FontSize', 17, 'FontWeight', 'bold');
-saveas(gcf, 'figures\jeq_lens_silicon.fig');
+saveas(gcf, 'figures\jeq_lens_plastic.fig');
 
 %% UV COORDINATES
 uv_grid = uv_repr(sph_grid);
@@ -179,20 +179,20 @@ yticks(-1 : 0.5 : 1);
 xlabel('U');
 ylabel('V');
 zlabel('|E| / dB');
-sgtitle(['E^{FF} @ silicon, f = ' num2str(wave.f * 1e-9) ...
-    ' GHz, D = 14\lambda, \theta_{max} = 5 deg, a = ' ...
+sgtitle(['E^{FF} @ plastic, f = ' num2str(wave.f * 1e-9) ...
+    ' GHz, D = 14\lambda, \theta_{max} = 2 deg, a = ' ...
     num2str(round(waveguide.a * 1e3, 2)) ' mm, and b = ' ...
     num2str(round(waveguide.b * 1e3, 2)) ' mm'], ...
     'FontSize', 17, 'FontWeight', 'bold');
-saveas(gcf, 'figures\ff_lens_silicon.fig');
+saveas(gcf, 'figures\ff_lens_plastic.fig');
 
 %% SAVE WORKSPACE
-lens_silicon.sph_grid = sph_grid;
-lens_silicon.theta = theta;
-lens_silicon.phi = phi;
-lens_silicon.cart_coord = cart_coord;
-lens_silicon.E = E;
-lens_silicon.J = J;
-lens_silicon.dir_broadside_db = dir_broadside_db;
-lens_silicon.eta = eta;
-save('results\lens_silicon.mat', 'lens_silicon');
+lens_plastic.sph_grid = sph_grid;
+lens_plastic.theta = theta;
+lens_plastic.phi = phi;
+lens_plastic.cart_coord = cart_coord;
+lens_plastic.E = E;
+lens_plastic.J = J;
+lens_plastic.dir_broadside_db = dir_broadside_db;
+lens_plastic.eta = eta;
+save('results\lens_plastic.mat', 'lens_plastic');
