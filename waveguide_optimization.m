@@ -2,9 +2,9 @@ close all;
 clear;
 clc;
 
-% waveguide_plastic;
-% waveguide_quartz;
-% waveguide_silicon;
+waveguide_plastic;
+waveguide_quartz;
+waveguide_silicon;
 
 close all;
 
