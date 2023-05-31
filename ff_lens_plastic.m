@@ -25,7 +25,7 @@ waveguide.a = 2.80 * 1e-3;
 waveguide.b = 1.88 * 1e-3;
 % Lens parameters
 lens.er = 2;
-lens.theta_max = 2 * pi / 180;
+lens.theta_max = 20 * pi / 180;
 % Grids parameters
 Nrho = 100;
 Nphi = 100;
@@ -43,7 +43,7 @@ waveguide.kz = sqrt(wave.k0 ^ 2 - waveguide.kx1 .^ 2);
 waveguide.ZTE = zeta * wave.k0 ./ waveguide.kz;
 waveguide.n = sqrt(waveguide.er);
 % Lens parameters
-lens.D = 14 * wave.wavelength;
+lens.D = 10 * wave.wavelength;
 lens.n = sqrt(lens.er);
 lens.Z = zeta / lens.n;
 
@@ -138,7 +138,7 @@ ylabel('y / mm');
 zlabel('|J_{y}| / dB');
 title('|J_{y}| / dB');
 sgtitle(['Aperture J_{eq} @ plastic, f = ' num2str(wave.f * 1e-9) ...
-    ' GHz, D = 14\lambda, \theta_{max} = 2 deg, a = ' ...
+    ' GHz, D = 10\lambda, \theta_{max} = 20 deg, a = ' ...
     num2str(round(waveguide.a * 1e3, 2)) ' mm, and b = ' ...
     num2str(round(waveguide.b * 1e3, 2)) ' mm'], ...
     'FontSize', 17, 'FontWeight', 'bold');
@@ -180,7 +180,7 @@ xlabel('U');
 ylabel('V');
 zlabel('|E| / dB');
 sgtitle(['E^{FF} @ plastic, f = ' num2str(wave.f * 1e-9) ...
-    ' GHz, D = 14\lambda, \theta_{max} = 2 deg, a = ' ...
+    ' GHz, D = 10\lambda, \theta_{max} = 20 deg, a = ' ...
     num2str(round(waveguide.a * 1e3, 2)) ' mm, and b = ' ...
     num2str(round(waveguide.b * 1e3, 2)) ' mm'], ...
     'FontSize', 17, 'FontWeight', 'bold');

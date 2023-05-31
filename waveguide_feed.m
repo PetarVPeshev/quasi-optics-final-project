@@ -17,6 +17,11 @@ function [E, M] = waveguide_feed(waveguide, te_coeff, k, k_comp, r, ...
         .* sinc(b * ky / (2 * pi)) ./ (kx .^ 2 - (pi / a) ^ 2);
     
     E_const = 1j * k * Mx .* exp(-1j * k * r) ./ (4 * pi * r);
+    if ~isempty(varargin)
+        if strcmp(varargin{1}, 'NeglectPhase')
+            E_const = 1j * k * Mx ./ (4 * pi * r);
+        end
+    end
     E = zeros( [size(sph_grid, 1, 2), 3] );
     % Theta component
     E(:, :, 2) = E_const .* sin(phi);
