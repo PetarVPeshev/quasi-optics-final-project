@@ -40,7 +40,7 @@ for a_idx = 1 : 1 : Na
     waveguide(a_idx).E10 = 1;
     waveguide(a_idx).er = 1;
     waveguide(a_idx).a = a(a_idx);
-    waveguide(a_idx).b = a(a_idx) / 2;
+    waveguide(a_idx).b = 1.88 * 1e-3;
 end
 % Lens parameters
 lens.er = 4;
@@ -95,8 +95,11 @@ figure('Position', [250 250 750 400]);
 plot(a * 1e3, 10 * log10(dir_broadside), 'LineWidth', 2.0, ...
     'DisplayName', 'D');
 hold on;
-xline(3.19, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
-    'DisplayName', 'min\{a\}');
+xline(2.5, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
+    'DisplayName', 'min\{a\}, a = 2.5 mm');
+hold on;
+xline(3.5, '--', 'Color', [0.4660 0.6740 0.1880], 'LineWidth', 2.0, ...
+    'DisplayName', 'initial a, a = 3.5 mm');
 grid on;
 xlim([min(a) max(a)] * 1e3);
 legend show;
@@ -113,8 +116,11 @@ end
 figure('Position', [250 250 750 400]);
 plot(a * 1e3, ZTE * 1e-3, 'LineWidth', 2.0, 'DisplayName', 'Z_{TE}');
 hold on;
-xline(3.19, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
-    'DisplayName', 'min\{a\}');
+xline(2.5, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
+    'DisplayName', 'min\{a\}, a = 2.5 mm');
+hold on;
+xline(3.5, '--', 'Color', [0.4660 0.6740 0.1880], 'LineWidth', 2.0, ...
+    'DisplayName', 'initial a, a = 3.5 mm');
 grid on;
 xlim([min(a) max(a)] * 1e3);
 legend show;
@@ -131,8 +137,11 @@ figure('Position', [250 250 750 400]);
 plot(a * 1e3, P_ratio, 'LineWidth', 2.0, ...
     'DisplayName', 'transmitted ratio');
 hold on;
-xline(3.19, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
-    'DisplayName', 'min\{a\}');
+xline(2.5, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
+    'DisplayName', 'min\{a\}, a = 2.5 mm');
+hold on;
+xline(3.5, '--', 'Color', [0.4660 0.6740 0.1880], 'LineWidth', 2.0, ...
+    'DisplayName', 'initial a, a = 3.5 mm');
 grid on;
 xlim([min(a) max(a)] * 1e3);
 legend show;
@@ -149,8 +158,11 @@ end
 figure('Position', [250 250 750 400]);
 plot(a * 1e3, kz, 'LineWidth', 2.0, 'DisplayName', 'k_{z}');
 hold on;
-xline(3.19, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
-    'DisplayName', 'min\{a\}');
+xline(2.5, '--', 'Color', [0.4940 0.1840 0.5560], 'LineWidth', 2.0, ...
+    'DisplayName', 'min\{a\}, a = 2.5 mm');
+hold on;
+xline(3.5, '--', 'Color', [0.4660 0.6740 0.1880], 'LineWidth', 2.0, ...
+    'DisplayName', 'initial a, a = 3.5 mm');
 grid on;
 xlim([min(a) max(a)] * 1e3);
 legend show;
