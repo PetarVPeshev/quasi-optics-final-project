@@ -43,7 +43,7 @@ waveguide.kz = sqrt(wave.k0 ^ 2 - waveguide.kx1 .^ 2);
 waveguide.ZTE = zeta * wave.k0 ./ waveguide.kz;
 waveguide.n = sqrt(waveguide.er);
 % Lens parameters
-lens.D = 11 * wave.wavelength;
+lens.D = 12 * wave.wavelength;
 lens.n = sqrt(lens.er);
 lens.Z = zeta / lens.n;
 
@@ -119,7 +119,7 @@ surface(cart_coord(:, :, 1) * 1e3, cart_coord(:, :, 2) * 1e3, ...
 grid on;
 colormap('jet');
 colorbar;
-caxis([-70 -50]);
+caxis([-50 0]);
 view(0, 90);
 xlabel('x / mm');
 ylabel('y / mm');
@@ -131,14 +131,14 @@ surface(cart_coord(:, :, 1) * 1e3, cart_coord(:, :, 2) * 1e3, ...
 grid on;
 colormap('jet');
 colorbar;
-caxis([-1 0]);
+caxis([-50 0]);
 view(0, 90);
 xlabel('x / mm');
 ylabel('y / mm');
 zlabel('|J_{y}| / dB');
 title('|J_{y}| / dB');
 sgtitle(['Aperture J_{eq} @ silicon, f = ' num2str(wave.f * 1e-9) ...
-    ' GHz, D = 11\lambda, \theta_{max} = 40 deg, a = ' ...
+    ' GHz, D = 12\lambda, \theta_{max} = 40 deg, a = ' ...
     num2str(round(waveguide.a * 1e3, 2)) ' mm, and b = ' ...
     num2str(round(waveguide.b * 1e3, 2)) ' mm'], ...
     'FontSize', 17, 'FontWeight', 'bold');
@@ -180,7 +180,7 @@ xlabel('U');
 ylabel('V');
 zlabel('|E| / dB');
 sgtitle(['E^{FF} @ silicon, f = ' num2str(wave.f * 1e-9) ...
-    ' GHz, D = 11\lambda, \theta_{max} = 40 deg, a = ' ...
+    ' GHz, D = 12\lambda, \theta_{max} = 40 deg, a = ' ...
     num2str(round(waveguide.a * 1e3, 2)) ' mm, and b = ' ...
     num2str(round(waveguide.b * 1e3, 2)) ' mm'], ...
     'FontSize', 17, 'FontWeight', 'bold');

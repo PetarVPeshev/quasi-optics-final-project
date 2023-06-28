@@ -119,7 +119,7 @@ surface(cart_coord(:, :, 1) * 1e3, cart_coord(:, :, 2) * 1e3, ...
 grid on;
 colormap('jet');
 colorbar;
-caxis([-75 -55]);
+caxis([-50 0]);
 view(0, 90);
 xlabel('x / mm');
 ylabel('y / mm');
@@ -131,7 +131,7 @@ surface(cart_coord(:, :, 1) * 1e3, cart_coord(:, :, 2) * 1e3, ...
 grid on;
 colormap('jet');
 colorbar;
-caxis([-1 0]);
+caxis([-50 0]);
 view(0, 90);
 xlabel('x / mm');
 ylabel('y / mm');

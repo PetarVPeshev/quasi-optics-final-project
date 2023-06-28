@@ -25,7 +25,7 @@ waveguide.a = 2.80 * 1e-3;
 waveguide.b = 1.88 * 1e-3;
 % Lens parameters
 lens.er = 2;
-theta_max = [20 10 5 2] * pi / 180;
+theta_max = 20 * pi / 180;
 % Grids parameters
 Nrho = 50;
 Nphi = 50;
